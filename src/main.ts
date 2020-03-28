@@ -16,9 +16,11 @@ async function run() {
     
     if ( tag ) {
       core.debug( `Getting release id for ${tag}...` );
-      const release = await octokit.repos.getReleaseByTag( { ...repo, tag } );
+      // getReleaseByTag() does not include draft releases
+      const releases = await octokit.repos.listReleases(repo);
+      const release = releases.data.find(release => release.tag_name == tag);
       
-      release_id = release.data.id;
+      release_id = release ? release.id : 0;
     } else {
       const action = github.context.payload.action;
 
